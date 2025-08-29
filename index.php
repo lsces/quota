@@ -15,11 +15,10 @@
 /**
  * required setup
  */
-require_once( '../kernel/includes/setup_inc.php' );
+require_once '../kernel/includes/setup_inc.php';
 
 $gBitSystem->verifyPackage( 'quota' );
 
-require_once( QUOTA_PKG_INCLUDE_PATH.'quota_inc.php' );
+require_once QUOTA_PKG_INCLUDE_PATH . 'quota_inc.php';
 
-$gBitSystem->display( 'bitpackage:quota/quota.tpl', 'View Quota' , array( 'display_mode' => 'display' ));
-?>
+$gBitSystem->display( 'bitpackage:quota/quota.tpl', 'View Quota' , [ 'display_mode' => 'display' ]);

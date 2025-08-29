@@ -10,7 +10,7 @@
 //	$gBitSmarty->assign( 'home_quota', $_REQUEST["homeSample"] );
 //}
 
-require_once( QUOTA_PKG_CLASS_PATH.'LibertyQuota.php' );
+use Bitweaver\Quota\LibertyQuota;
 
 if( !empty( $_REQUEST['cancelquota'] ) ) {
 	unset( $_REQUEST['quota_id'] );
@@ -24,7 +24,7 @@ if( !empty( $_REQUEST['savequota'] ) ) {
 		die;
 	} else {
 		$saveError = TRUE;
-		$gBitSmarty->assignByRef( 'errors', $gQuota->mErrors );
+		$gBitSmarty->assign( 'errors', $gQuota->mErrors );
 	}
 } elseif( !empty( $_REQUEST['assignquota'] ) ) {
 	foreach( array_keys( $_REQUEST ) as $key ) {
@@ -37,16 +37,14 @@ if( !empty( $_REQUEST['savequota'] ) ) {
 }
 $gQuota->load();
 if( $gQuota->isValid() || isset( $_REQUEST['newquota'] ) || !empty( $saveError ) ) {
-	$gBitSmarty->assignByRef('gQuota', $gQuota);
+	$gBitSmarty->assign('gQuota', $gQuota);
 } else {
 	$quotas = $gQuota->getList();
 	$systemGroups = $gQuota->getQuotaGroups();
-	$gBitSmarty->assignByRef('systemGroups', $systemGroups );
+	$gBitSmarty->assign('systemGroups', $systemGroups );
 foreach( array_keys( $systemGroups ) as $groupId ) {
 	$groupQuota[$groupId] = $gQuota->getQuotaMenu( 'quota_group_'.$groupId, $systemGroups[$groupId]['quota_id'] );
 }
-	$gBitSmarty->assignByRef('groupQuota', $groupQuota );
-	$gBitSmarty->assignByRef('quotaList', $quotas);
+	$gBitSmarty->assign('groupQuota', $groupQuota );
+	$gBitSmarty->assign('quotaList', $quotas);
 }
-
-?>

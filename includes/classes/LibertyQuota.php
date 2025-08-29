@@ -15,7 +15,10 @@
 /**
  * required setup
  */
-require_once( LIBERTY_PKG_CLASS_PATH.'LibertyAttachable.php' );
+
+namespace Bitweaver\Quota;
+use Bitweaver\BitBase;
+use Bitweaver\Liberty\LibertyBase;
 
 /**
  * Quota class to illustrate best practices when creating a new bitweaver package that
@@ -35,12 +38,12 @@ class LibertyQuota extends LibertyBase {
     * Primary key for our mythical Quota class object & table
     * @public
     */
-	var $mQuotaId;
+	public $mQuotaId;
 
     /**
     * During initialisation, be sure to call our base constructors
 	**/
-	function __construct( $pQuotaId=NULL, $pContentId=NULL ) {
+	public function __construct( $pQuotaId=NULL, $pContentId=NULL ) {
 		$this->mQuotaId = $pQuotaId;
 		parent::__construct();
 	}
@@ -48,14 +51,14 @@ class LibertyQuota extends LibertyBase {
 
     /**
     * Any method named Store inherently implies data will be written to the database
-    * @param pParamHash be sure to pass by reference in case we need to make modifcations to the hash
+    * @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
 	**/
-	function store( &$pParamHash ) {
+	public function store( &$pParamHash ) {
 		if( $this->verify( $pParamHash ) ) {
 			$this->mDb->StartTrans();
 			$table = BIT_DB_PREFIX."quotas";
 			if( $this->mQuotaId ) {
-				$result = $this->mDb->associateUpdate( $table, $pParamHash['quota_store'], array( "quota_id" => $pParamHash['quota_id'] ) );
+				$result = $this->mDb->associateUpdate( $table, $pParamHash['quota_store'], [ "quota_id" => $pParamHash['quota_id'] ] );
 			} else {
 				$this->mQuotaId = $this->mDb->GenID( 'quota_id_seq' );
 				$pParamHash['quota_store']['quota_id'] = $this->mQuotaId;
@@ -69,9 +72,9 @@ class LibertyQuota extends LibertyBase {
 
     /**
     * Make sure the data is safe to store
-    * @param pParamHash be sure to pass by reference in case we need to make modifcations to the hash
+    * @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
 	**/
-	function verify( &$pParamHash ) {
+	public function verify( &$pParamHash ) {
 		if( isset( $pParamHash['description'] ) ) {
 			// insure we don't have column overflow, etc.
 			$pParamHash['quota_store']['description'] = trim( $pParamHash['description'], 0, 160 );
@@ -100,32 +103,32 @@ class LibertyQuota extends LibertyBase {
 
     /**
     * Load the data from the database
-    * @param pParamHash be sure to pass by reference in case we need to make modifcations to the hash
+    * @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
 	**/
-	function load() {
+	public function load() {
 		if( $this->mQuotaId ) {
 			// LibertyContent::load() assumes you have joined already, and will not execute any sql!
 			// This is a significant performance optimization
 			$query = "SELECT qo.* FROM `".BIT_DB_PREFIX."quotas` qo WHERE qo.`quota_id`=?";
-			$result = $this->mDb->query( $query, array( $this->mQuotaId ) );
+			$result = $this->mDb->query( $query, [ $this->mQuotaId ] );
 			if ( $result && $result->numRows() ) {
 				$this->mInfo = $result->fields;
 				$query = "SELECT ug.`group_id`, ug.* FROM `".BIT_DB_PREFIX."users_groups` ug INNER JOIN `".BIT_DB_PREFIX."quotas_group_map` qgm ON( ug.`group_id`=qgm.`group_id` ) WHERE qgm.`quota_id`=?";
-				if( $rs = $this->mDb->query( $query, array( $this->mQuotaId ) ) ) {
+				if( $rs = $this->mDb->query( $query, [ $this->mQuotaId ] ) ) {
 					$this->mInfo['quota_groups'] = $rs->fields;
 				}
 			}
 		}
-		return( count( $this->mInfo ) == 0 );
+		return count( $this->mInfo ) == 0;
 	}
 
     /**
     *
 	**/
-	function getList() {
+	public function getList() {
 		$query = "SELECT qo.`quota_id`, qo.* FROM `".BIT_DB_PREFIX."quotas` qo";
 		$ret = $this->mDb->getAssoc($query);
-		return ( $ret );
+		return $ret;
 	}
 
     /**
@@ -154,17 +157,17 @@ class LibertyQuota extends LibertyBase {
 	**/
 	function assignQuotaToGroup( $pQuotaId, $pGroupId ) {
 		if( is_numeric( $pQuotaId ) && is_numeric( $pGroupId ) ) {
-			$hasRow = $this->mDb->getOne( 'SELECT `quota_id` FROM  `'.BIT_DB_PREFIX.'quotas_group_map` WHERE `group_id`=?',array( $pGroupId ) );
+			$hasRow = $this->mDb->getOne( 'SELECT `quota_id` FROM  `'.BIT_DB_PREFIX.'quotas_group_map` WHERE `group_id`=?', [ $pGroupId ] );
  			if( $hasRow ) {
 				$query = 'UPDATE `'.BIT_DB_PREFIX.'quotas_group_map` SET `quota_id`=? WHERE `group_id`=?';
-				$rs = $this->mDb->query( $query, array( $pQuotaId, $pGroupId ) );
+				$rs = $this->mDb->query( $query, [ $pQuotaId, $pGroupId ] );
 			} else {
 				$query = 'INSERT INTO `'.BIT_DB_PREFIX.'quotas_group_map` (`quota_id`, `group_id`) VALUES (?,?)';
-				$rs = $this->mDb->query( $query, array( $pQuotaId, $pGroupId ) );
+				$rs = $this->mDb->query( $query, [ $pQuotaId, $pGroupId ] );
 			}
 		} elseif( is_numeric( $pGroupId ) && empty( $pQuotaId ) ) {
 			$query = 'DELETE FROM `'.BIT_DB_PREFIX.'quotas_group_map` WHERE `group_id`=?';
-			$rs = $this->mDb->query( $query, array( $pGroupId ) );
+			$rs = $this->mDb->query( $query, [ $pGroupId ] );
 		}
 	}
 
@@ -181,11 +184,11 @@ class LibertyQuota extends LibertyBase {
 						INNER JOIN `'.BIT_DB_PREFIX.'quotas_group_map` qgm ON( qgm.`group_id`=ugm.`group_id` )
 						INNER JOIN `'.BIT_DB_PREFIX.'quotas` qo ON( qo.`quota_id`=qgm.`quota_id` )
 					  WHERE uu.`user_id`=?';
-			if( $rs = $this->mDb->query( $query, array( $pUserId ) ) ) {
+			if( $rs = $this->mDb->query( $query, [ $pUserId ] ) ) {
 				$diskQuota = $rs->fields['disk_usage'];
 				$diskConsumed = $this->getUserUsage( $pUserId );
 				if( $diskQuota == NULL || $diskQuota > $diskConsumed ) {
-					$ret = array($diskQuota, $diskConsumed);
+					$ret = [ $diskQuota, $diskConsumed ];
 				}
 			}
 		}
@@ -195,10 +198,10 @@ class LibertyQuota extends LibertyBase {
 
 	/**
 	* Given a user_id, this will return the max quota for the given user. If the user belongs to more than one group, it will chose the max values
-	* @param pUserId user_id of the user for usage to be calculated for
-	* @returns an integer of the total bytes used
+	* @param integer pUserId user_id of the user for usage to be calculated for
+	* @return integer an integer of the total bytes used
 	*/
-	function getUserQuota( $pUserId ) {
+	public function getUserQuota( $pUserId ) {
 		$ret = 0;
 		if( is_numeric( $pUserId ) ) {
 			$query = 'SELECT MAX(qo.`disk_usage`) AS `disk_usage`
@@ -207,17 +210,17 @@ class LibertyQuota extends LibertyBase {
 						INNER JOIN `'.BIT_DB_PREFIX.'quotas_group_map` qgm ON( qgm.`group_id`=ugm.`group_id` )
 						INNER JOIN `'.BIT_DB_PREFIX.'quotas` qo ON( qo.`quota_id`=qgm.`quota_id` )
 					  WHERE uu.`user_id`=?';
-			$ret = $this->mDb->getOne( $query, array( $pUserId ) );
+			$ret = $this->mDb->getOne( $query, [ $pUserId ] );
 		}
 		return $ret;
 	}
 
 	/**
 	* Given a user_id, this will return this disk space used for the given user
-	* @param pUserId user_id of the user for usage to be calculated for
-	* @returns an integer of the total bytes used
+	* @param integer pUserId user_id of the user for usage to be calculated for
+	* @return integer an integer of the total bytes used
 	*/
-	function getUserUsage( $pUserId ) {
+	public function getUserUsage( $pUserId ) {
 		$ret = 0;
 		if( is_numeric( $pUserId ) ) {
 			// INNER JOIN on attachments so orphans are not counted
@@ -228,20 +231,18 @@ class LibertyQuota extends LibertyBase {
 
     /**
     * Generates the URL to the quota page
-    * @return the link to display the page.
+    * @return string the link to display the page.
     */
-	function getDisplayUrl() {
+	public function getDisplayUrl() {
 		$ret = NULL;
-		if( @BitBase::verifyId( $this->mQuotaId ) ) {
+		if( BitBase::verifyId( $this->mQuotaId ) ) {
 			$ret = QUOTA_PKG_URL."index.php?quota_id=".$this->mQuotaId;
 		}
 		return $ret;
 	}
 
-	function isValid() {
-		return( @BitBase::verifyId( $this->mQuotaId ) );
+	public function isValid() {
+		return @BitBase::verifyId( $this->mQuotaId );
 	}
 
 }
-
-?>

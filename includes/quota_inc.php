@@ -9,7 +9,9 @@
 /**
  * quota setup
  */
-require_once( QUOTA_PKG_CLASS_PATH.'LibertyQuota.php' );
+
+use Bitweaver\Quota\LibertyQuota;
+
 global $gBitSmarty, $assignUser, $gBitUser;
 
 if( empty( $pQuotaUserId ) ) {
@@ -24,19 +26,14 @@ $quota = new LibertyQuota();
 $diskUsage = $quota->getUserUsage( $pQuotaUserId );
 $diskQuota = $quota->getUserQuota( $pQuotaUserId );
 
-if( $diskQuota != 0 ) {
-        $quotaPercent = round( (($diskUsage / $diskQuota) * 100), 0 );
-} else {
-        $quotaPercent = 0;
-}
+$quotaPercent = $diskQuota != 0 ? round( ( $diskUsage / $diskQuota ) * 100, 0 ) : 0;
 
 if( $quotaPercent > 100 ) {
         $errors['disk_quota'] = "You are over your disk quota.";
-        $gBitSmarty->assignByRef( 'errors', $errors );
+        $gBitSmarty->assign( 'errors', $errors );
         $quotaPercent = 100;
 }
 
-$gBitSmarty->assign( 'usage', round( ($diskUsage / 1000000), 2 ) );
-$gBitSmarty->assign( 'quota', round( ($diskQuota / 1000000), 2 ) );
-$gBitSmarty->assignByRef( 'quotaPercent', $quotaPercent );
-?>
+$gBitSmarty->assign( 'usage', round( $diskUsage / 1000000, 2 ) );
+$gBitSmarty->assign( 'quota', round( $diskQuota / 1000000, 2 ) );
+$gBitSmarty->assign( 'quotaPercent', $quotaPercent );
