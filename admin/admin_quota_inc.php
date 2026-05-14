@@ -22,10 +22,10 @@ if( !empty( $_REQUEST['savequota'] ) ) {
 	if( $gQuota->store( $_REQUEST ) ) {
 		header( 'Location: '.KERNEL_PKG_URL.'admin/index.php?page=quota' );
 		die;
-	} else {
+	}
 		$saveError = TRUE;
 		$gBitSmarty->assign( 'errors', $gQuota->mErrors );
-	}
+
 } elseif( !empty( $_REQUEST['assignquota'] ) ) {
 	foreach( array_keys( $_REQUEST ) as $key ) {
 		if( preg_match( '/^quota_group_([-0-9]*)/', $key, $match ) ) {

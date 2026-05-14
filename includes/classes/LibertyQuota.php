@@ -17,6 +17,7 @@
  */
 
 namespace Bitweaver\Quota;
+
 use Bitweaver\BitBase;
 use Bitweaver\Liberty\LibertyBase;
 
@@ -34,24 +35,23 @@ use Bitweaver\Liberty\LibertyBase;
  * @version $Revision$
  */
 class LibertyQuota extends LibertyBase {
-    /**
-    * Primary key for our mythical Quota class object & table
-    * @public
-    */
+	/**
+	* Primary key for our mythical Quota class object & table
+	* @public
+	*/
 	public $mQuotaId;
 
-    /**
-    * During initialisation, be sure to call our base constructors
+	/**
+	* During initialisation, be sure to call our base constructors
 	**/
 	public function __construct( $pQuotaId=NULL, $pContentId=NULL ) {
 		$this->mQuotaId = $pQuotaId;
 		parent::__construct();
 	}
 
-
-    /**
-    * Any method named Store inherently implies data will be written to the database
-    * @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
+	/**
+	* Any method named Store inherently implies data will be written to the database
+	* @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
 	**/
 	public function store( &$pParamHash ) {
 		if( $this->verify( $pParamHash ) ) {
@@ -70,9 +70,9 @@ class LibertyQuota extends LibertyBase {
 		return( count( $this->mErrors ) == 0 );
 	}
 
-    /**
-    * Make sure the data is safe to store
-    * @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
+	/**
+	* Make sure the data is safe to store
+	* @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
 	**/
 	public function verify( &$pParamHash ) {
 		if( isset( $pParamHash['description'] ) ) {
@@ -101,9 +101,9 @@ class LibertyQuota extends LibertyBase {
 		return( count( $this->mErrors ) == 0 );
 	}
 
-    /**
-    * Load the data from the database
-    * @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
+	/**
+	* Load the data from the database
+	* @param array pParamHash be sure to pass by reference in case we need to make modifcations to the hash
 	**/
 	public function load() {
 		if( $this->mQuotaId ) {
@@ -122,8 +122,8 @@ class LibertyQuota extends LibertyBase {
 		return count( $this->mInfo ) == 0;
 	}
 
-    /**
-    *
+	/**
+	*
 	**/
 	public function getList() {
 		$query = "SELECT qo.`quota_id`, qo.* FROM `".BIT_DB_PREFIX."quotas` qo";
@@ -131,8 +131,8 @@ class LibertyQuota extends LibertyBase {
 		return $ret;
 	}
 
-    /**
-    *
+	/**
+	*
 	**/
 	function getQuotaMenu( $pName='quota_menu', $pSelectId=NULL ) {
 		$query = "SELECT qo.`title`, qo.`quota_id` FROM `".BIT_DB_PREFIX."quotas` qo";
@@ -150,15 +150,13 @@ class LibertyQuota extends LibertyBase {
 		return $this->mDb->getAssoc( $sql );
 	}
 
-
-
-    /**
-    *
+	/**
+	*
 	**/
 	function assignQuotaToGroup( $pQuotaId, $pGroupId ) {
 		if( is_numeric( $pQuotaId ) && is_numeric( $pGroupId ) ) {
 			$hasRow = $this->mDb->getOne( 'SELECT `quota_id` FROM  `'.BIT_DB_PREFIX.'quotas_group_map` WHERE `group_id`=?', [ $pGroupId ] );
- 			if( $hasRow ) {
+			if( $hasRow ) {
 				$query = 'UPDATE `'.BIT_DB_PREFIX.'quotas_group_map` SET `quota_id`=? WHERE `group_id`=?';
 				$rs = $this->mDb->query( $query, [ $pQuotaId, $pGroupId ] );
 			} else {
@@ -171,9 +169,8 @@ class LibertyQuota extends LibertyBase {
 		}
 	}
 
-
-    /**
-    * returns the quota and consumption if a user is under usage level
+	/**
+	* returns the quota and consumption if a user is under usage level
 	**/
 	function isUserUnderQuota( $pUserId ) {
 		$ret = FALSE;
@@ -194,7 +191,6 @@ class LibertyQuota extends LibertyBase {
 		}
 		return $ret;
 	}
-
 
 	/**
 	* Given a user_id, this will return the max quota for the given user. If the user belongs to more than one group, it will chose the max values
@@ -224,15 +220,15 @@ class LibertyQuota extends LibertyBase {
 		$ret = 0;
 		if( is_numeric( $pUserId ) ) {
 			// INNER JOIN on attachments so orphans are not counted
-			$ret = $this->mDb->getOne( "SELECT SUM(`file_size`) FROM `".BIT_DB_PREFIX."liberty_files` lf  INNER JOIN `".BIT_DB_PREFIX."liberty_attachments` la ON (lf.`file_id`=la.`foreign_id`) WHERE lf.`user_id`=?", array( $pUserId ) );
+			$ret = $this->mDb->getOne( "SELECT SUM(`file_size`) FROM `".BIT_DB_PREFIX."liberty_files` lf  INNER JOIN `".BIT_DB_PREFIX."liberty_attachments` la ON (lf.`file_id`=la.`foreign_id`) WHERE lf.`user_id`=?", [ $pUserId ] );
 		}
 		return $ret;
 	}
 
-    /**
-    * Generates the URL to the quota page
-    * @return string the link to display the page.
-    */
+	/**
+	* Generates the URL to the quota page
+	* @return string the link to display the page.
+	*/
 	public function getDisplayUrl() {
 		$ret = NULL;
 		if( BitBase::verifyId( $this->mQuotaId ) ) {

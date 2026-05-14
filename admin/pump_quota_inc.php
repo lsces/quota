@@ -10,7 +10,6 @@
  */
 use Bitweaver\Quota\LibertyQuota;
 
-
 $quota = new LibertyQuota();
 $quota->mDb->Execute("INSERT INTO `".BIT_DB_PREFIX."quotas` ( `quota_id`, `disk_usage`, `monthly_transfer`, `title`, `description` ) VALUES ('1', 2000000, 20000000, 'Free Trial', 'A little space to try out site features' )");
 $quota->mDb->Execute("INSERT INTO `".BIT_DB_PREFIX."quotas` ( `quota_id`, `disk_usage`, `monthly_transfer`, `title`, `description` ) VALUES ('2', 10000000, 100000000, 'Site Supporters', 'Extra space for site supporters.' )");

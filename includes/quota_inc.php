@@ -29,9 +29,9 @@ $diskQuota = $quota->getUserQuota( $pQuotaUserId );
 $quotaPercent = $diskQuota != 0 ? round( ( $diskUsage / $diskQuota ) * 100, 0 ) : 0;
 
 if( $quotaPercent > 100 ) {
-        $errors['disk_quota'] = "You are over your disk quota.";
-        $gBitSmarty->assign( 'errors', $errors );
-        $quotaPercent = 100;
+		$errors['disk_quota'] = "You are over your disk quota.";
+		$gBitSmarty->assign( 'errors', $errors );
+		$quotaPercent = 100;
 }
 
 $gBitSmarty->assign( 'usage', round( $diskUsage / 1000000, 2 ) );
